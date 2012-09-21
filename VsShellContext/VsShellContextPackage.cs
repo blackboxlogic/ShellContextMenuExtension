@@ -68,7 +68,7 @@ namespace Outstance.VsShellContext
                 // Create the command for the menu item.
                 CommandID menuCommandID = new CommandID(GuidList.guidVsShellContextCmdSet, (int)PkgCmdIDList.cmdShellContextMenu);
                 MenuCommand menuItem = new MenuCommand(MenuItemCallback, menuCommandID );
-                mcs.AddCommand( menuItem );mcs.
+                mcs.AddCommand( menuItem );
             }
         }
         #endregion
