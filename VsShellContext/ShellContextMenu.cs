@@ -1504,11 +1504,13 @@ namespace Outstance.VsShellContext
         // Install the hook
         public void Install()
         {
+            var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+
             m_hhook = SetWindowsHookEx(
                 m_hookType,
                 m_filterFunc,
                 IntPtr.Zero,
-                (int)AppDomain.GetCurrentThreadId());
+                threadId);
         }
         // ************************************************************************
 
