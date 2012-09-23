@@ -23,9 +23,6 @@
   <!--Definition of some VSCT specific constants. In this sample we use it for the IDs inside the guidOfficeIcon group. -->
   <!--<Extern href="msobtnid.h" xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" />-->
 
-
-
-
   <!--The Commands section is where we the commands, menus and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
   <Commands package="guidVsShellContextPkg">
@@ -43,10 +40,6 @@
          group as the part of a menu contained between two lines. The parent of a group 
          must be a menu. -->
     <Groups>
-
-      <!--Group guid="guidVsShellContextCmdSet" id="MyMenuGroup" priority="0x0600">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
-      </Group-->
 
       <Group guid="guidVsShellContextCmdSet" id="MyMenuGroup" priority="0x0001">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
@@ -74,9 +67,6 @@
           <ButtonText>Shell Context Menu</ButtonText>
         </Strings>
       </Button>
-
-
-
     </Buttons>
    
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -86,18 +76,14 @@
             bitmap strip containing the bitmaps and then there are the numeric ids of the elements used 
             inside a button definition. An important aspect of this declaration is that the element id 
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
-      <Bitmap guid="guidImages" href="Resources\Images_32bit.bmp" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows" />
-		<Bitmap guid="guidIcon" href="Resources\Icon.ico" />
+  		<Bitmap guid="guidIcon" href="Resources\Icon.ico" />
     </Bitmaps>
- 
+
   </Commands>
 
   <KeyBindings>
     <KeyBinding guid="guidVsShellContextCmdSet" id="cmdShellContextMenu" editor="guidVSStd97" mod1="Control" key1="e" mod2="Control" key2="x" />
   </KeyBindings>
-
-
-
 
   <Symbols>
     <!-- This is the package guid. -->
@@ -114,13 +100,6 @@
 		  <IDSymbol name="main" value="1" />
 	  </GuidSymbol>
     
-    <GuidSymbol name="guidImages" value="{7210edab-d30a-4d8a-a2ec-5b8c975880ca}">
-      <IDSymbol name="bmpPic1" value="1" />
-      <IDSymbol name="bmpPic2" value="2" />
-      <IDSymbol name="bmpPicSearch" value="3" />
-      <IDSymbol name="bmpPicX" value="4" />
-      <IDSymbol name="bmpPicArrows" value="5" />
-    </GuidSymbol>
   </Symbols>
 
 </CommandTable>
