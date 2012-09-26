@@ -35,6 +35,8 @@ namespace Outstance.VsShellContext
     public sealed class VsShellContextPackage : Package
     {
         private DTE _dte;
+        private IVsMonitorSelection _monitorSelection;
+        private readonly Guid SolutionExplorerGuid = new Guid(EnvDTE.Constants.vsWindowKindSolutionExplorer);
 
         /// <summary>
         /// Default constructor of the package.
@@ -64,7 +66,8 @@ namespace Outstance.VsShellContext
             base.Initialize();
 
             _dte = GetService(typeof(SDTE)) as DTE;
-            
+            _monitorSelection = (IVsMonitorSelection)GetService(typeof(SVsShellMonitorSelection));
+             
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if ( null != mcs )
@@ -84,14 +87,27 @@ namespace Outstance.VsShellContext
         /// </summary>
         private void MenuItemCallback(object sender, EventArgs e)
         {
+            WindowType winType = GetActiveWindowType();
+            if (winType == WindowType.Unknown)
+                return;
+
             try
             {
-                var doc = _dte.ActiveDocument;
-                if (doc == null)
-                    return;
-
-                var filename = doc.FullName;
-
+                string filename = null;
+                if (winType == WindowType.CodeEditor)
+                {
+                    var doc = _dte.ActiveDocument;
+                    if (doc == null)
+                        return;
+                    filename = doc.FullName;
+                }
+                else if (winType == WindowType.SolutionExplorer)
+                {
+                    var uiH = (UIHierarchy)_dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Object;
+                    var selItems = (UIHierarchyItem[]) uiH.SelectedItems;
+                    var item = selItems[0].Object as ProjectItem;
+                    filename = item.Properties.Item("FullPath").Value.ToString();
+                }
                 var c = new ShellContextMenu();
                 var fileInfo = new[] { new FileInfo(filename) };
                 c.ShowContextMenu(fileInfo, System.Windows.Forms.Cursor.Position);
@@ -103,6 +119,27 @@ namespace Outstance.VsShellContext
                     OLEMSGICON.OLEMSGICON_CRITICAL);
             }
 
+        }
+
+        private WindowType GetActiveWindowType()
+        {
+            object element;
+            var x = _monitorSelection.GetCurrentElementValue((uint)Microsoft.VisualStudio.VSConstants.VSSELELEMID.SEID_WindowFrame, out element);
+            if (element == null)
+                return WindowType.Unknown;
+
+            var window = element as IVsWindowFrame;
+            Guid typeGuid;
+            window.GetGuidProperty((int)__VSFPROPID.VSFPROPID_CmdUIGuid, out typeGuid);
+            if (typeGuid == null)
+                return WindowType.Unknown;
+
+            if (typeGuid.Equals(SolutionExplorerGuid))
+                return WindowType.SolutionExplorer;
+            else if (typeGuid.Equals(VSConstants.VsEditorFactoryGuid.TextEditor_guid))
+                return WindowType.CodeEditor;
+
+            return WindowType.Unknown;
         }
 
         private void MessageBox(string title, string message, OLEMSGICON icon = OLEMSGICON.OLEMSGICON_NOICON)
@@ -125,5 +162,11 @@ namespace Outstance.VsShellContext
                        out result));
         }
 
+    }
+    public enum WindowType
+    {
+        Unknown,
+        SolutionExplorer,
+        CodeEditor,
     }
 }

@@ -44,7 +44,9 @@
       <Group guid="guidVsShellContextCmdSet" id="MyMenuGroup" priority="0x0001">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
       </Group>
-
+      <Group guid="guidVsShellContextCmdSet" id="MyMenuGroup" priority="0x0001">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
+      </Group>
     </Groups>
     
     <!--Buttons section. -->
