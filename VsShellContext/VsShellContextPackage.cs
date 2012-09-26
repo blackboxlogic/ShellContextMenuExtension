@@ -34,6 +34,8 @@ namespace Outstance.VsShellContext
     [Guid(GuidList.guidVsShellContextPkgString)]
     public sealed class VsShellContextPackage : Package
     {
+        private DTE _dte;
+
         /// <summary>
         /// Default constructor of the package.
         /// Inside this method you can place any initialization code that does not require 
@@ -61,6 +63,8 @@ namespace Outstance.VsShellContext
             Trace.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
+            _dte = GetService(typeof(SDTE)) as DTE;
+            
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if ( null != mcs )
@@ -80,33 +84,45 @@ namespace Outstance.VsShellContext
         /// </summary>
         private void MenuItemCallback(object sender, EventArgs e)
         {
-            var dte = GetService(typeof(SDTE)) as DTE;
-            var doc = dte.ActiveDocument;
-            if (doc == null)
-                return;
+            try
+            {
+                var doc = _dte.ActiveDocument;
+                if (doc == null)
+                    return;
 
-            var filename = doc.FullName;
+                var filename = doc.FullName;
 
-            var c = new ShellContextMenu();
-            var fileInfo = new[] { new FileInfo(filename) };
-            c.ShowContextMenu(fileInfo, System.Windows.Forms.Cursor.Position);
+                var c = new ShellContextMenu();
+                var fileInfo = new[] { new FileInfo(filename) };
+                c.ShowContextMenu(fileInfo, System.Windows.Forms.Cursor.Position);
+            }
+            catch (Exception ex)
+            {
+                MessageBox("Error", 
+                    string.Format("{0}\r\n{1}", ex.Message, ex.StackTrace),
+                    OLEMSGICON.OLEMSGICON_CRITICAL);
+            }
 
-//            // Show a Message Box to prove we were here
-//            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
-//            Guid clsid = Guid.Empty;
-//            int result;
-//            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(uiShell.ShowMessageBox(
-//                       0,
-//                       ref clsid,
-//                       "VsShellContext",
-//                       string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.ToString()),
-//                       string.Empty,
-//                       0,
-//                       OLEMSGBUTTON.OLEMSGBUTTON_OK,
-//                       OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST,
-//                       OLEMSGICON.OLEMSGICON_INFO,
-//                       0,        // false
-//                       out result));
+        }
+
+        private void MessageBox(string title, string message, OLEMSGICON icon = OLEMSGICON.OLEMSGICON_NOICON)
+        {
+            // Show a Message Box
+            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
+            Guid clsid = Guid.Empty;
+            int result;
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(uiShell.ShowMessageBox(
+                       0,
+                       ref clsid,
+                       title,
+                       message,
+                       string.Empty,
+                       0,
+                       OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                       OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST,
+                       icon,
+                       0,        // false
+                       out result));
         }
 
     }
