@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.ComponentModel.Design;
 using EnvDTE;
-using Microsoft.Win32;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 
 namespace Outstance.VsShellContext
@@ -47,7 +47,7 @@ namespace Outstance.VsShellContext
         /// </summary>
         public VsShellContextPackage()
         {
-            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this));
         }
 
 
@@ -62,7 +62,7 @@ namespace Outstance.VsShellContext
         /// </summary>
         protected override void Initialize()
         {
-            Trace.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+            Trace.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this));
             base.Initialize();
 
             _dte = GetService(typeof(SDTE)) as DTE;
@@ -93,28 +93,32 @@ namespace Outstance.VsShellContext
 
             try
             {
-                string filename = null;
+                IEnumerable<string> filenames = null;
                 if (winType == WindowType.CodeEditor)
                 {
                     var doc = _dte.ActiveDocument;
                     if (doc == null)
                         return;
-                    filename = doc.FullName;
+                    filenames = new[] {doc.FullName};
                 }
                 else if (winType == WindowType.SolutionExplorer)
                 {
+                    // TODO: (NP) Better null validation. For now just let them bubble up as exception.
                     var uiH = (UIHierarchy)_dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Object;
-                    var selItems = (UIHierarchyItem[]) uiH.SelectedItems;
-                    var item = selItems[0].Object as ProjectItem;
-                    filename = item.Properties.Item("FullPath").Value.ToString();
+                    var selItems = uiH.SelectedItems as UIHierarchyItem[];
+                    filenames = selItems.Select(i => ((ProjectItem)i.Object).Properties.Item("FullPath").Value.ToString());
                 }
+
                 var c = new ShellContextMenu();
-                var fileInfo = new[] { new FileInfo(filename) };
+                if (filenames == null)
+                    return;
+                var fileInfo = filenames.Select(f => new FileInfo(f)).ToArray(); // new[] { new FileInfo(filename) };
                 c.ShowContextMenu(fileInfo, System.Windows.Forms.Cursor.Position);
+
             }
             catch (Exception ex)
             {
-                MessageBox("Error", 
+                MessageBox("Error",
                     string.Format("{0}\r\n{1}", ex.Message, ex.StackTrace),
                     OLEMSGICON.OLEMSGICON_CRITICAL);
             }
@@ -124,19 +128,17 @@ namespace Outstance.VsShellContext
         private WindowType GetActiveWindowType()
         {
             object element;
-            var x = _monitorSelection.GetCurrentElementValue((uint)Microsoft.VisualStudio.VSConstants.VSSELELEMID.SEID_WindowFrame, out element);
+            _monitorSelection.GetCurrentElementValue((uint)Microsoft.VisualStudio.VSConstants.VSSELELEMID.SEID_WindowFrame, out element);
             if (element == null)
                 return WindowType.Unknown;
 
             var window = element as IVsWindowFrame;
             Guid typeGuid;
             window.GetGuidProperty((int)__VSFPROPID.VSFPROPID_CmdUIGuid, out typeGuid);
-            if (typeGuid == null)
-                return WindowType.Unknown;
-
+            
             if (typeGuid.Equals(SolutionExplorerGuid))
                 return WindowType.SolutionExplorer;
-            else if (typeGuid.Equals(VSConstants.VsEditorFactoryGuid.TextEditor_guid))
+            if (typeGuid.Equals(VSConstants.VsEditorFactoryGuid.TextEditor_guid))
                 return WindowType.CodeEditor;
 
             return WindowType.Unknown;

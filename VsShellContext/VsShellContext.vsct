@@ -84,7 +84,7 @@
   </Commands>
 
   <KeyBindings>
-    <KeyBinding guid="guidVsShellContextCmdSet" id="cmdShellContextMenu" editor="GUID_TextEditorFactory" mod1="Control" key1="e" mod2="Control" key2="x" />
+    <KeyBinding guid="guidVsShellContextCmdSet" id="cmdShellContextMenu" editor="guidVSStd97" mod1="Control" key1="e" mod2="Control" key2="x" />
   </KeyBindings>
 
   <Symbols>
