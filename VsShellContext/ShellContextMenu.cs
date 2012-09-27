@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
@@ -489,6 +490,8 @@ namespace Outstance.VsShellContext
 
                 pMenu = CreatePopupMenu();
 
+                try
+                {
                 int nResult = _oContextMenu.QueryContextMenu(
                     pMenu,
                     0,
@@ -497,7 +500,17 @@ namespace Outstance.VsShellContext
                     CMF.EXPLORE |
                     CMF.NORMAL |
                     ((Control.ModifierKeys & Keys.Shift) != 0 ? CMF.EXTENDEDVERBS : 0));
-
+                }catch(Exception ex)
+                {
+                    Debug.WriteLine(
+                        "_oContextMenu={0}\npMenu={1}\n_arrPIDLs={2}\n_oParentFolder={3}",
+                        _oContextMenu, 
+                        pMenu,
+                        string.Join(",", _arrPIDLs),
+                        _oParentFolder
+                        );
+                    throw;
+                }
                 Marshal.QueryInterface(iContextMenuPtr, ref IID_IContextMenu2, out iContextMenuPtr2);
                 Marshal.QueryInterface(iContextMenuPtr, ref IID_IContextMenu3, out iContextMenuPtr3);
 

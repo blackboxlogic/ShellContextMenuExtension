@@ -150,6 +150,8 @@ namespace Outstance.VsShellContext
             if (windowTypeGuid.Equals(VSConstants.VsEditorFactoryGuid.TextEditor_guid))
                 return WindowType.DocumentEditor;
 
+            // We don't know what it is, argh! Log to output window so we could find out what it is..
+            Debug.WriteLine(windowTypeGuid);
             return WindowType.Unknown;
         }
 
