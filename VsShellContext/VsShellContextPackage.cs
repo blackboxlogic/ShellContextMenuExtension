@@ -37,6 +37,7 @@ namespace Outstance.VsShellContext
         private DTE _dte;
         private IVsMonitorSelection _monitorSelection;
         private readonly Guid SolutionExplorerGuid = new Guid(EnvDTE.Constants.vsWindowKindSolutionExplorer);
+        private const int DocumentFrame = 1;
 
         /// <summary>
         /// Default constructor of the package.
@@ -94,7 +95,7 @@ namespace Outstance.VsShellContext
             try
             {
                 IEnumerable<string> filenames = null;
-                if (winType == WindowType.CodeEditor)
+                if (winType == WindowType.DocumentEditor)
                 {
                     var doc = _dte.ActiveDocument;
                     if (doc == null)
@@ -133,13 +134,21 @@ namespace Outstance.VsShellContext
                 return WindowType.Unknown;
 
             var window = element as IVsWindowFrame;
-            Guid typeGuid;
-            window.GetGuidProperty((int)__VSFPROPID.VSFPROPID_CmdUIGuid, out typeGuid);
+
+            // Using VSFPROPID_Type we could quickly identify if it's a Document Frame (1), or a Tool Window (2)
+            object windowFrameType;
+            window.GetProperty((int)__VSFPROPID.VSFPROPID_Type, out windowFrameType);
+            if ((int)windowFrameType == DocumentFrame)
+                return WindowType.DocumentEditor;
+
+            // Well it's not the editor. Now check by guid to see what it is.
+            Guid windowTypeGuid;
+            window.GetGuidProperty((int)__VSFPROPID.VSFPROPID_CmdUIGuid, out windowTypeGuid);
             
-            if (typeGuid.Equals(SolutionExplorerGuid))
+            if (windowTypeGuid.Equals(SolutionExplorerGuid))
                 return WindowType.SolutionExplorer;
-            if (typeGuid.Equals(VSConstants.VsEditorFactoryGuid.TextEditor_guid))
-                return WindowType.CodeEditor;
+            if (windowTypeGuid.Equals(VSConstants.VsEditorFactoryGuid.TextEditor_guid))
+                return WindowType.DocumentEditor;
 
             return WindowType.Unknown;
         }
@@ -169,6 +178,6 @@ namespace Outstance.VsShellContext
     {
         Unknown,
         SolutionExplorer,
-        CodeEditor,
+        DocumentEditor,
     }
 }
