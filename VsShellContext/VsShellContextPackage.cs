@@ -143,15 +143,15 @@ namespace Outstance.VsShellContext
 
             // Well it's not the editor. Now check by guid to see what it is.
             Guid windowTypeGuid;
-            window.GetGuidProperty((int)__VSFPROPID.VSFPROPID_CmdUIGuid, out windowTypeGuid);
-            
+            window.GetGuidProperty((int)__VSFPROPID.VSFPROPID_GuidPersistenceSlot, out windowTypeGuid);
+
+            OutputWindow.Log("Current Guid: " + windowTypeGuid);
+
             if (windowTypeGuid.Equals(SolutionExplorerGuid))
                 return WindowType.SolutionExplorer;
             if (windowTypeGuid.Equals(VSConstants.VsEditorFactoryGuid.TextEditor_guid))
                 return WindowType.DocumentEditor;
 
-            // We don't know what it is, argh! Log to output window so we could find out what it is..
-            Debug.WriteLine(windowTypeGuid);
             return WindowType.Unknown;
         }
 
