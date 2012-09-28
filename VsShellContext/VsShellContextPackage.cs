@@ -106,8 +106,10 @@ namespace Outstance.VsShellContext
                 {
                     // TODO: (NP) Better null validation. For now just let them bubble up as exception.
                     var uiH = (UIHierarchy)_dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Object;
-                    var selItems = uiH.SelectedItems as UIHierarchyItem[];
-                    filenames = selItems.Select(i => ((ProjectItem)i.Object).Properties.Item("FullPath").Value.ToString());
+                    var selItems = uiH.SelectedItems as Array;
+                    filenames = selItems.Cast<UIHierarchyItem>()
+                        .Select(item => 
+                            ((ProjectItem)item.Object).Properties.Item("FullPath").Value.ToString());
                 }
 
                 var c = new ShellContextMenu();
@@ -145,13 +147,13 @@ namespace Outstance.VsShellContext
             Guid windowTypeGuid;
             window.GetGuidProperty((int)__VSFPROPID.VSFPROPID_GuidPersistenceSlot, out windowTypeGuid);
 
-            OutputWindow.Log("Current Guid: " + windowTypeGuid);
-
             if (windowTypeGuid.Equals(SolutionExplorerGuid))
                 return WindowType.SolutionExplorer;
             if (windowTypeGuid.Equals(VSConstants.VsEditorFactoryGuid.TextEditor_guid))
                 return WindowType.DocumentEditor;
 
+            // Log unknown window
+            OutputWindow.Log("Current window Guid: " + windowTypeGuid);
             return WindowType.Unknown;
         }
 
