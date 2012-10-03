@@ -94,7 +94,8 @@ namespace Outstance.VsShellContext
 
             try
             {
-                IEnumerable<string> filenames = null;
+                IList<string> filenames = null;
+
                 if (winType == WindowType.DocumentEditor)
                 {
                     var doc = _dte.ActiveDocument;
@@ -104,12 +105,7 @@ namespace Outstance.VsShellContext
                 }
                 else if (winType == WindowType.SolutionExplorer)
                 {
-                    // TODO: (NP) Better null validation. For now just let them bubble up as exception.
-                    var uiH = (UIHierarchy)_dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Object;
-                    var selItems = uiH.SelectedItems as Array;
-                    filenames = selItems.Cast<UIHierarchyItem>()
-                        .Select(item => 
-                            ((ProjectItem)item.Object).Properties.Item("FullPath").Value.ToString());
+                    filenames = PopulateFileNamesFromSolutionExplorer();
                 }
 
                 var c = new ShellContextMenu();
@@ -126,6 +122,38 @@ namespace Outstance.VsShellContext
                     OLEMSGICON.OLEMSGICON_CRITICAL);
             }
 
+        }
+
+        private IList<string> PopulateFileNamesFromSolutionExplorer()
+        {
+            // TODO: (NP) Better null validation. For now just let them bubble up as exception.
+            var uiH = (UIHierarchy)_dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Object;
+            var selItems = uiH.SelectedItems as Array;
+
+            var result = new List<string>();
+
+            var selHierarchyItems = selItems.Cast<UIHierarchyItem>();
+            foreach (var hierarchyItem in selHierarchyItems)
+            {
+                // Top-level project. See below for projects in folders.
+                var project = hierarchyItem.Object as Project;
+                if (project != null)
+                {
+                    result.Add(project.FullName);
+                    continue;
+                }
+
+                var projectItem = hierarchyItem.Object as ProjectItem;
+                if (projectItem != null)
+                {
+                    // Somehow, projects inside a Solution Folder (i.e. "virtual" folder) gets wrapped inside another project item..
+                    if (projectItem.Object is Project)
+                        result.Add(((Project)projectItem.Object).FullName);
+                    else //This is a normal file.
+                        result.Add(projectItem.Properties.Item("FullPath").Value.ToString());
+                }
+            }
+            return result;
         }
 
         private WindowType GetActiveWindowType()

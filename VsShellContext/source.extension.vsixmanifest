@@ -3,7 +3,7 @@
   <Identifier Id="985f5dc4-11c5-497e-bd9d-a84a2ddc7816">
     <Name>Shell Context Menu</Name>
     <Author>Outstance</Author>
-    <Version>1.1</Version>
+    <Version>1.2</Version>
     <Description xml:space="preserve">Visual Studio Shell Context Menu</Description>
     <Locale>1033</Locale>
     <InstalledByMsi>false</InstalledByMsi>
