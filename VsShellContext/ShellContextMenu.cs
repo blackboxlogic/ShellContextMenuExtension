@@ -33,7 +33,7 @@ namespace Outstance.VsShellContext
     ///    files[0] = new FileInfo(@"c:\windows\notepad.exe");
     ///    scm.ShowContextMenu(this.Handle, files, Cursor.Position);
     /// </example>
-    public class ShellContextMenu : NativeWindow
+    public class ShellContextMenu : NativeWindow, IDisposable
     {
         #region Constructor
         /// <summary>Default constructor</summary>
@@ -43,13 +43,11 @@ namespace Outstance.VsShellContext
         }
         #endregion
 
-        #region Destructor
         /// <summary>Ensure all resources get released</summary>
-        ~ShellContextMenu()
+        public void Dispose()
         {
             ReleaseAll();
         }
-        #endregion
 
         #region GetContextMenuInterfaces()
         /// <summary>Gets the interfaces to the context menu</summary>

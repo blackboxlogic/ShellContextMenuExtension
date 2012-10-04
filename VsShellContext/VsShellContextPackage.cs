@@ -108,12 +108,14 @@ namespace Outstance.VsShellContext
                     filenames = PopulateFileNamesFromSolutionExplorer();
                 }
 
-                var c = new ShellContextMenu();
                 if (filenames == null)
                     return;
-                var fileInfo = filenames.Select(f => new FileInfo(f)).ToArray(); // new[] { new FileInfo(filename) };
-                c.ShowContextMenu(fileInfo, System.Windows.Forms.Cursor.Position);
-
+                    
+                using (var c = new ShellContextMenu())
+                {
+                    var fileInfos = filenames.Select(f => new FileInfo(f)).ToArray();
+                    c.ShowContextMenu(fileInfos, System.Windows.Forms.Cursor.Position);
+                }
             }
             catch (Exception ex)
             {
