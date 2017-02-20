@@ -500,13 +500,8 @@ namespace Outstance.VsShellContext
                     ((Control.ModifierKeys & Keys.Shift) != 0 ? CMF.EXTENDEDVERBS : 0));
                 }catch(Exception ex)
                 {
-                    OutputWindow.Log(string.Format(
-                        "_oContextMenu={0}\npMenu={1}\n_arrPIDLs={2}\n_oParentFolder={3}",
-                        _oContextMenu, 
-                        pMenu,
-                        string.Join(",", _arrPIDLs),
-                        _oParentFolder
-                        ));
+                    OutputWindow.Log(
+                        $"_oContextMenu={_oContextMenu}\npMenu={pMenu}\n_arrPIDLs={string.Join(",", _arrPIDLs)}\n_oParentFolder={_oParentFolder}\nExcetption: {ex}");
                     throw;
                 }
                 Marshal.QueryInterface(iContextMenuPtr, ref IID_IContextMenu2, out iContextMenuPtr2);
