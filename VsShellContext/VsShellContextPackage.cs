@@ -139,23 +139,23 @@ namespace Outstance.VsShellContext
             foreach (var hierarchyItem in selHierarchyItems)
             {
                 // Top-level project. See below for projects in folders.
-                var project = hierarchyItem.Object as Project;
-                if (project != null)
+                if (hierarchyItem.Object is Project project)
                 {
                     result.Add(project.FullName);
-                    continue;
                 }
-
-                var projectItem = hierarchyItem.Object as ProjectItem;
-                if (projectItem != null)
+                else if (hierarchyItem.Object is ProjectItem projectItem)
                 {
-                    // Somehow, projects inside a Solution Folder (i.e. "virtual" folder) gets wrapped inside another project item..
-                    if (projectItem.Object is Project)
-                        result.Add(((Project)projectItem.Object).FullName);
-                    else if (projectItem.Properties == null) // This is a solution item
-                        result.Add(projectItem.Name);
-                    else //This is a normal file.
+                    // Projects inside a Solution Folder (i.e. "virtual" folder) gets wrapped inside another project item.
+                    if (projectItem.Object is Project innerProject)
+                    {
+                        result.Add(innerProject.Object.FullName);
+                    }
+                    else
+                    {
+                        // Files in a Solution Folder (i.e. "virtual" folder) need to be re-looked up in the solution.
+                        projectItem = _dte.Solution.FindProjectItem(projectItem.Name);
                         result.Add(projectItem.Properties.Item("FullPath").Value.ToString());
+                    }
                 }
             }
             return result;
