@@ -10,6 +10,7 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
+using System.Reflection;
 
 namespace Outstance.VsShellContext
 {
@@ -36,7 +37,7 @@ namespace Outstance.VsShellContext
     {
         private DTE _dte;
         private IVsMonitorSelection _monitorSelection;
-        private readonly Guid SolutionExplorerGuid = new Guid(EnvDTE.Constants.vsWindowKindSolutionExplorer);
+        private readonly Guid SolutionExplorerGuid = new Guid("{3AE79031-E1BC-11D0-8F78-00A0C9110057}");
         private const int DocumentFrame = 1;
 
         /// <summary>
@@ -129,7 +130,7 @@ namespace Outstance.VsShellContext
         private IList<string> PopulateFileNamesFromSolutionExplorer()
         {
             // TODO: (NP) Better null validation. For now just let them bubble up as exception.
-            var uiH = (UIHierarchy)_dte.Windows.Item(EnvDTE.Constants.vsWindowKindSolutionExplorer).Object;
+            var uiH = (UIHierarchy)_dte.Windows.Item("{3AE79031-E1BC-11D0-8F78-00A0C9110057}").Object;
             var selItems = uiH.SelectedItems as Array;
 
             var result = new List<string>();
