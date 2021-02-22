@@ -152,6 +152,8 @@ namespace Outstance.VsShellContext
                     // Somehow, projects inside a Solution Folder (i.e. "virtual" folder) gets wrapped inside another project item..
                     if (projectItem.Object is Project)
                         result.Add(((Project)projectItem.Object).FullName);
+                    else if (projectItem.Properties == null) // This is a solution item
+                        result.Add(projectItem.Name);
                     else //This is a normal file.
                         result.Add(projectItem.Properties.Item("FullPath").Value.ToString());
                 }
