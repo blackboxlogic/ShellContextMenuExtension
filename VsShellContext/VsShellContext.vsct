@@ -50,6 +50,9 @@
       <Group guid="guidVsShellContextCmdSet" id="MyMenuGroup" priority="0x0001">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
       </Group>
+      <Group guid="guidVsShellContextCmdSet" id="MyMenuGroup" priority="0x0001">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_EZDOCWINTAB" />
+      </Group>
     </Groups>
     
     <!--Buttons section. -->
