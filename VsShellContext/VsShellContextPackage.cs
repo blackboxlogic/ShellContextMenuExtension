@@ -10,7 +10,6 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
-using System.Reflection;
 
 namespace Outstance.VsShellContext
 {
