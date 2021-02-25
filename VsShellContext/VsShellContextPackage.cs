@@ -156,9 +156,7 @@ namespace Outstance.VsShellContext
                         }
                         else
                         {
-                            // Files in a Solution Folder (i.e. "virtual" folder) need to be re-looked up in the solution.
-                            projectItem = _dte.Solution.FindProjectItem(projectItem.Name);
-                            result.Add(projectItem.Properties.Item("FullPath").Value.ToString());
+                            result.Add(projectItem.FileNames[1]);
                         }
                     }
                 }
