@@ -138,22 +138,28 @@ namespace Outstance.VsShellContext
             foreach (var hierarchyItem in selHierarchyItems)
             {
                 // Top-level project. See below for projects in folders.
-                if (hierarchyItem.Object is Project project)
+                var project = hierarchyItem.Object as Project;
+                if (project != null)
                 {
                     result.Add(project.FullName);
                 }
-                else if (hierarchyItem.Object is ProjectItem projectItem)
+                else
                 {
-                    // Projects inside a Solution Folder (i.e. "virtual" folder) gets wrapped inside another project item.
-                    if (projectItem.Object is Project innerProject)
+                    var projectItem = hierarchyItem.Object as ProjectItem;
+                    if (projectItem != null)
                     {
-                        result.Add(innerProject.Object.FullName);
-                    }
-                    else
-                    {
-                        // Files in a Solution Folder (i.e. "virtual" folder) need to be re-looked up in the solution.
-                        projectItem = _dte.Solution.FindProjectItem(projectItem.Name);
-                        result.Add(projectItem.Properties.Item("FullPath").Value.ToString());
+                        // Projects inside a Solution Folder (i.e. "virtual" folder) gets wrapped inside another project item.
+                        var innerProject = projectItem.Object as Project;
+                        if (innerProject != null)
+                        {
+                            result.Add(innerProject.Object.FullName);
+                        }
+                        else
+                        {
+                            // Files in a Solution Folder (i.e. "virtual" folder) need to be re-looked up in the solution.
+                            projectItem = _dte.Solution.FindProjectItem(projectItem.Name);
+                            result.Add(projectItem.Properties.Item("FullPath").Value.ToString());
+                        }
                     }
                 }
             }
